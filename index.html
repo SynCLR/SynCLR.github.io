@@ -1,0 +1,470 @@
+<html>
+
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <title>SynCLR: A Synthetic Contrastive Learning Approach for Multi-domain Speech Representation</title>
+   <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+   <!-- <link rel="shortcut icon" href="../../images/taco.png"> -->
+   <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      jax: ["input/TeX", "output/HTML-CSS"],
+      extensions: ["tex2jax.js"],
+      "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"], scale: 77},
+      tex2jax: { inlineMath: [ ["$", "$"], ["\\(","\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
+      TeX: { noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "50%" } } },
+      messageStyle: "none"
+    });
+    </script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js"></script>
+   <script>
+      function play(path) {
+         {
+            var player = document.getElementById('player');
+            player.src = path;
+            player.play();
+         }
+      }
+      function isInternetExplorer() {
+         ua = navigator.userAgent;
+         /* MSIE used to detect old browsers and Trident used to newer ones*/
+         return ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
+      }
+
+      /* Define the Animation class */
+      function Animation(frames, img_id, slider_id, interval, loop_select_id) {
+         this.img_id = img_id;
+         this.slider_id = slider_id;
+         this.loop_select_id = loop_select_id;
+         this.interval = interval;
+         this.current_frame = 0;
+         this.direction = 0;
+         this.timer = null;
+         this.frames = new Array(frames.length);
+
+         for (var i = 0; i < frames.length; i++) {
+            this.frames[i] = new Image();
+            this.frames[i].src = frames[i];
+         }
+         var slider = document.getElementById(this.slider_id);
+         slider.max = this.frames.length - 1;
+         if (isInternetExplorer()) {
+            // switch from oninput to onchange because IE <= 11 does not conform
+            // with W3C specification. It ignores oninput and onchange behaves
+            // like oninput. In contrast, Mircosoft Edge behaves correctly.
+            slider.setAttribute('onchange', slider.getAttribute('oninput'));
+            slider.setAttribute('oninput', null);
+         }
+         this.set_frame(this.current_frame);
+      }
+
+      Animation.prototype.get_loop_state = function () {
+         return 0;
+      }
+
+      Animation.prototype.set_frame = function (frame) {
+         this.current_frame = frame;
+         document.getElementById(this.img_id).src =
+            this.frames[this.current_frame].src;
+         document.getElementById(this.slider_id).value = this.current_frame;
+      }
+
+      Animation.prototype.next_frame = function () {
+         this.set_frame(Math.min(this.frames.length - 1, this.current_frame + 1));
+      }
+
+      Animation.prototype.previous_frame = function () {
+         this.set_frame(Math.max(0, this.current_frame - 1));
+      }
+
+      Animation.prototype.first_frame = function () {
+         this.set_frame(0);
+      }
+
+      Animation.prototype.last_frame = function () {
+         this.set_frame(this.frames.length - 1);
+      }
+
+      Animation.prototype.slower = function () {
+         this.interval /= 0.7;
+         if (this.direction > 0) { this.play_animation(); }
+         else if (this.direction < 0) { this.reverse_animation(); }
+      }
+
+      Animation.prototype.faster = function () {
+         this.interval *= 0.7;
+         if (this.direction > 0) { this.play_animation(); }
+         else if (this.direction < 0) { this.reverse_animation(); }
+      }
+
+      Animation.prototype.anim_step_forward = function () {
+         this.current_frame += 1;
+         if (this.current_frame < this.frames.length) {
+            this.set_frame(this.current_frame);
+         } else {
+            var loop_state = this.get_loop_state();
+            if (loop_state == "loop") {
+               this.first_frame();
+            } else if (loop_state == "reflect") {
+               this.last_frame();
+               this.reverse_animation();
+            } else {
+               this.pause_animation();
+               this.last_frame();
+            }
+         }
+      }
+
+      Animation.prototype.anim_step_reverse = function () {
+         this.current_frame -= 1;
+         if (this.current_frame >= 0) {
+            this.set_frame(this.current_frame);
+         } else {
+            var loop_state = this.get_loop_state();
+            if (loop_state == "loop") {
+               this.last_frame();
+            } else if (loop_state == "reflect") {
+               this.first_frame();
+               this.play_animation();
+            } else {
+               this.pause_animation();
+               this.first_frame();
+            }
+         }
+      }
+
+      Animation.prototype.pause_animation = function () {
+         this.direction = 0;
+         if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+         }
+      }
+
+      Animation.prototype.play_animation = function () {
+         this.pause_animation();
+         this.direction = 1;
+         var t = this;
+         if (!this.timer) this.timer = setInterval(function () {
+            t.anim_step_forward();
+         }, this.interval);
+      }
+
+      Animation.prototype.reverse_animation = function () {
+         this.pause_animation();
+         this.direction = -1;
+         var t = this;
+         if (!this.timer) this.timer = setInterval(function () {
+            t.anim_step_reverse();
+         }, this.interval);
+      }
+   </script>
+   <style>
+      .animation {
+         display: inline-block;
+         text-align: center;
+      }
+
+      input[type=range].anim-slider {
+         width: 374px;
+         margin-left: auto;
+         margin-right: auto;
+      }
+
+      .anim-buttons {
+         margin: 8px 0px;
+      }
+
+      .anim-buttons button {
+         padding: 0;
+         width: 36px;
+      }
+
+      .anim-state label {
+         margin-right: 8px;
+      }
+
+      .anim-state input {
+         margin: 0;
+         vertical-align: middle;
+      }
+
+      .audio-cell {
+         /* Center audio widgets in the table cell. */
+         text-align: center;
+         padding-bottom: 1px;
+         padding-top: 1px;
+      }
+
+      .audio-cell-padded {
+         text-align: center;
+         padding-bottom: 10px;
+         padding-top: 10px;
+      }
+
+      .audio-header {
+         /* Don't wrap header text. */
+         white-space: nowrap;
+         /* Some breaking space between headers for readability. */
+         padding-right: 5px;
+         padding-left: 5px;
+      }
+
+      .reference-cell {
+         /* For uniformity and to wrap long reference text, limit the reference cell's width. */
+         width: 25%;
+         padding-top: 20px;
+         padding-bottom: 20px;
+      }
+
+      .sample audio {
+         vertical-align: middle;
+         padding-left: 3px;
+         padding-right: 3px;
+      }
+
+      .round-button {
+         box-sizing: border-box;
+         display: block;
+         width: 30px;
+         height: 30px;
+         padding-top: 8px;
+         padding-left: 3px;
+         line-height: 6px;
+         border: 1.2px solid #000;
+         border-radius: 50%;
+         color: #000;
+         text-align: center;
+         background-color: rgba(0, 0, 0, 0.00);
+         font-size: 6px;
+         box-shadow: 0px 0px 2px rgba(0, 0, 0, 1);
+         transition: all 0.2s ease;
+      }
+
+      .round-button:hover {
+         background-color: rgba(0, 0, 0, 0.0);
+         box-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+      }
+
+      .round-button:active {
+         background-color: rgba(0, 0, 0, 0.01);
+         box-shadow: 0px 0px 1px rgba(0, 0, 0, 1);
+      }
+   </style>
+</head>
+
+<body>
+   <div class="main">
+      <article>
+         <header>
+            <h1>SynCLR: A Synthetic Contrastive Learning Approach for Multi-domain Speech Representation</h1>
+         </header>
+      </article>
+      <div align="justify">
+         <p><b>Abstract:</b> Achieving automated auditory perception requires the learning of effective representations, and contrastive learning has seen a resurgence by learning to be invariant to multiple augmented views in recent years. However, previous augmentation methods and resulting domain-invariant representation could perform poor generalization of representation encoding network. This paper presents SynCLR, a synthetic contrastive learning framework for generalizable speech representation. We adopt a novel diffusion based synthetic data manipulation model for view generation and guarantee a diverse speech distribution. SynCLR learns to capture varying and invariant factors for speech representations by constructing separate embedding spaces, each of which is sensitive to a single view. We demonstrate that our synthetic diffusion data manipulated method achieves state-of-the-art in terms of quality and speed. By combining these findings, we are able to considerably outperform previous methods for self-supervised learning on speaker verification and supervised learning on speech to image translation.
+         </p>
+
+
+         <h2> 1. Diffusion based synthetic data manipulation</h2>
+         
+         <p>
+            <b>Note:</b> "+" denotes FastSpeech 2 combined with corresponding method.
+         </p>
+         <table>
+         <thead>
+            <th style="text-align: center">Text</th>
+            <th style="text-align: center"><span class="text_e2e">the medium sized bird has a dark grey color, a black downward curved beak, and long wings.</span></th>
+            <th style="text-align: center"><span class="text_e2e">this large bird has a bright orange bill, a white colored belly, and white eyebrows and cheek patches.</span></th>
+            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            </thead>
+
+
+            <tbody>
+                <tr>
+                    <th>GT</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/10.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th> +Diffwave</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/11.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/11.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/11.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/11.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th> +WaveGrad</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/15.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/15.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/15.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/15.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+                <tbody>
+                <tr>
+                    <th> +SynGrad</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/GT/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+
+
+         </tbody>
+         <tbody>
+         <tr>
+             <th> +HIFI-GAN</th>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/GT/10.wav" type="audio/wav"></audio></td>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/WaveRNN/10.wav" type="audio/wav"></audio></td>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
+         </tr>
+     </tbody>
+        </table>
+
+
+         <h2> 2. View generation</h2>
+         <h3> A. Multi-view in speech-to-image translation</h3>
+         <table>
+
+
+
+            <thead>
+            <th style="text-align: center">Speech manipulation</th>
+            <th style="text-align: center"><span class="text_e2e">the medium sized bird has a dark grey color, a black downward curved beak, and long wings.</span></th>
+            <th style="text-align: center"><span class="text_e2e">this large bird has a bright orange bill, a white colored belly, and white eyebrows and cheek patches.</span></th>
+            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            </thead>
+
+                        
+            <tbody>
+               <tr>
+                   <th>Target image</th>
+                   <td width="25%" align="justify" valign="top">
+                     <img src="imgs/birds/Black_Footed_Albatross_0001_796111.jpg" width="90%" style="padding-top:3%;">
+                     <br/></td>
+                     <td width="25%" align="justify" valign="top">
+                        <img src="imgs/birds/Rhinoceros_Auklet_0001_797538.jpg" width="90%" style="padding-top:3%;">
+                        <br/>
+                     </td>
+                     <td width="25%" align="justify" valign="top">
+                        <img src="imgs/birds_b2_simclr.png" width="90%" style="padding-top:3%;">
+                        <br/>
+                     </td>
+                     <td width="25%" align="justify" valign="top">
+                        <img src="imgs/birds_b2_simclr.png" width="90%" style="padding-top:3%;">
+                        <br/>
+                     </td>
+               </tr>
+           </tbody>
+
+            <tbody>
+                <tr>
+                    <th>Base</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\source\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\source\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/10.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th>Content</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\content\Black_Footed_Albatross_0001_796111_1.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\content\Rhinoceros_Auklet_0001_797538_1.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/11.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/11.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th>Prosody</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\prosody\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\prosody\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/15.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/15.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+                <tbody>
+                <tr>
+                    <th>Speaker</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\speaker\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\speaker\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+        </table>
+        
+
+         <h3> B. Multi-view in speaker verification</h3>
+
+         <br>
+         <table>
+
+
+
+            <thead>
+            <th style="text-align: center">Speech manipulation</th>
+            <th style="text-align: center"><span class="text_e2e">That will not signify; I never mind dirt."</span><br><br><br></th>
+            <th style="text-align: center"><span class="text_e2e">To the understanding or to the senses?</span><br><br><br></th>
+            <th style="text-align: center"><span class="text_e2e">Thus spake Zarathustra.</span><br><br><br></th>
+            <th style="text-align: center"><span class="text_e2e">The congregation rose.</span><br><br><br></th>
+            
+            </thead>
+            
+            <tbody>
+               <tr>
+                  <th>Speaker ID</th>
+                   <th>14</th>
+                   <th>296</th>
+                   <th>1392</th>
+                   <th>2269</th>
+               </tr>
+           </tbody>
+
+
+            <tbody>
+                <tr>
+                    <th>Base</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\source\14_208_000006_000001.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\source\296_129659_000004_000003.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\source\1392_128226_000003_000000.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\source\2269_88761_000010_000000.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th>Content</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\14_208_000007_000000.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\296_129659_000004_000002.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\1392_128226_000013_000003.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\2269_88761_000008_000000.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th>Prosody</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\prosody\14_208_000006_000001.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\prosody\296_129659_000004_000003.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\prosody\1392_128226_000003_000000.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\prosody\2269_88761_000010_000000.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2> 3. Ablation Study</h2>
+
+      </div>
+</body>
+
+</html>
