@@ -257,77 +257,63 @@
    <div class="main">
       <article>
          <header>
-            <h1>SynCLR: A Synthetic Contrastive Learning Approach for Multi-domain Speech Representation</h1>
+            <h1>SynCLR: A Synthesis Framework for Contrastive Learning of out-of-domain Speech Representations</h1>
          </header>
       </article>
       <div align="justify">
-         <p><b>Abstract:</b> Achieving automated auditory perception requires the learning of effective representations, and contrastive learning has seen a resurgence by learning to be invariant to multiple augmented views in recent years. However, previous augmentation methods and resulting domain-invariant representation could perform poor generalization of representation encoding network. This paper presents SynCLR, a synthetic contrastive learning framework for generalizable speech representation. We adopt a novel diffusion based synthetic data manipulation model for view generation and guarantee a diverse speech distribution. SynCLR learns to capture varying and invariant factors for speech representations by constructing separate embedding spaces, each of which is sensitive to a single view. We demonstrate that our synthetic diffusion data manipulated method achieves state-of-the-art in terms of quality and speed. By combining these findings, we are able to considerably outperform previous methods for self-supervised learning on speaker verification and supervised learning on speech to image translation.
+         <p><b>Abstract:</b>Learning generalizable speech representations for unseen samples in different domains has been a challenge with ever increasing importance to date. Although contrastive learning has been a prominent class of representation learning approaches, the state-of-the-art (SOTA) contrastive learning methods were found to have limited ability for learning unseen out-of-domain speech representations. This paper presents SynCLR, a synthesis framework for contrastive learning of speech representations that can be generalized over unseen domains. Specifically, instead of using data augmentation approach, SynCLR employs data synthesis for multi-view generation. To ensure a highly-varied conditional speech distribution in view generation, we design a novel diffusion-based speech synthesizer. A new contrastive loss is also proposed to construct multiple embedding spaces, each of which preserves view-sensitive information to reduce domain reliance for a better disentanglement. Our experiments showed that SynCLR outperformed the SOTA contrastive learning methods with a 17.2% relative reduction of EER in speaker verification tested on an unseen speech corpus, and considerably reduced 50.8% relative FIDs in a challenging speech-to-image translation task given out-of-domain test speeches.
          </p>
+         <p><b>Paper: </b> <a href="https://openreview.net/forum?id=S-sYYe0P0Hd/"><i>https://openreview.net/forum?id=S-sYYe0P0Hd/</i></a>. </p>
+         <p><b>Demo Page: </b> <a href="https://synclr.github.io/"><i>https://synclr.github.io/</i></a>. </p>
 
 
-         <h2> 1. Diffusion based synthetic data manipulation</h2>
+         <h2> 1. Diffusion-based Multi-view Data Synthesis</h2>
          
          <p>
-            <b>Note:</b> "+" denotes FastSpeech 2 combined with corresponding method.
+            <b>Note:</b> "+" denotes FastSpeech 2 combined with corresponding method. All diffusion-based neural vocoders generate samples within 6 reverse steps.
          </p>
          <table>
          <thead>
             <th style="text-align: center">Text</th>
-            <th style="text-align: center"><span class="text_e2e">the medium sized bird has a dark grey color, a black downward curved beak, and long wings.</span></th>
-            <th style="text-align: center"><span class="text_e2e">this large bird has a bright orange bill, a white colored belly, and white eyebrows and cheek patches.</span></th>
             <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
-            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
-            </thead>
-
+            <th style="text-align: center"><span class="text_e2e">since a disclosure of such detailed information relating to protective measures might undermine present methods of protecting the President.</span></th>
+            <th style="text-align: center"><span class="text_e2e">Printing, in the only sense with which we are at present concerned, differs from most if not from all the arts and crafts represented in the Exhibition.</span></th>
 
             <tbody>
                 <tr>
-                    <th>GT</th>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/10.wav" type="audio/wav"></audio></td>
-                </tr>
-            </tbody>
-            <tbody>
-                <tr>
-                    <th> +Diffwave</th>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/11.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/11.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/11.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/11.wav" type="audio/wav"></audio></td>
+                    <th> +HIFI-GAN</th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/HIFIGAN/LJ001-0001.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/HIFIGAN/LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/HIFIGAN/LJ046-0026.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
             <tbody>
                 <tr>
                     <th> +WaveGrad</th>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/GT/15.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/WaveRNN/15.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/15.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/15.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/WaveGrad/WaveGrad6_LJ001-0001.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/WaveGrad/WaveGrad6_LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/WaveGrad/WaveGrad6_LJ046-0026.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
-                <tbody>
+
+            <tbody>
+               <tr>
+                   <th> +Diffwave</th>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/Diffwave/Diffwave6_LJ001-0001.wav" type="audio/wav"></audio></td>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/Diffwave/Diffwave6_LJ037-0061.wav" type="audio/wav"></audio></td>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/Diffwave/Diffwave6_LJ046-0026.wav" type="audio/wav"></audio></td>
+               </tr>
+           </tbody>
+
+            <tbody>
                 <tr>
                     <th> +SynGrad</th>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/GT/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/SynGrad/LJ001-0001.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/SynGrad/LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Comparision/SynGrad/LJ046-0026.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
 
-
-         </tbody>
-         <tbody>
-         <tr>
-             <th> +HIFI-GAN</th>
-             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/GT/10.wav" type="audio/wav"></audio></td>
-             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/WaveRNN/10.wav" type="audio/wav"></audio></td>
-             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
-             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
-         </tr>
-     </tbody>
         </table>
 
 
@@ -338,30 +324,20 @@
 
 
             <thead>
-            <th style="text-align: center">Speech manipulation</th>
+            <th width="20%"; style="text-align: center">Multi-view</th>
             <th style="text-align: center"><span class="text_e2e">the medium sized bird has a dark grey color, a black downward curved beak, and long wings.</span></th>
-            <th style="text-align: center"><span class="text_e2e">this large bird has a bright orange bill, a white colored belly, and white eyebrows and cheek patches.</span></th>
-            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
-            <th style="text-align: center"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            <th style="text-align: center"><span class="text_e2e">this large bird has a bright orange bill, a white colored belly, and white eyebrows and cheek patches.<br/></span></th>
             </thead>
 
                         
             <tbody>
                <tr>
                    <th>Target image</th>
-                   <td width="25%" align="justify" valign="top">
+                   <td  align="justify" valign="top">
                      <img src="imgs/birds/Black_Footed_Albatross_0001_796111.jpg" width="90%" style="padding-top:3%;">
                      <br/></td>
-                     <td width="25%" align="justify" valign="top">
+                     <td  align="justify" valign="top">
                         <img src="imgs/birds/Rhinoceros_Auklet_0001_797538.jpg" width="90%" style="padding-top:3%;">
-                        <br/>
-                     </td>
-                     <td width="25%" align="justify" valign="top">
-                        <img src="imgs/birds_b2_simclr.png" width="90%" style="padding-top:3%;">
-                        <br/>
-                     </td>
-                     <td width="25%" align="justify" valign="top">
-                        <img src="imgs/birds_b2_simclr.png" width="90%" style="padding-top:3%;">
                         <br/>
                      </td>
                </tr>
@@ -372,17 +348,13 @@
                     <th>Base</th>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\source\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\source\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/10.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
             <tbody>
                 <tr>
-                    <th>Content</th>
+                    <th>Text</th>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\content\Black_Footed_Albatross_0001_796111_1.wav" type="audio/wav"></audio></td>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\content\Rhinoceros_Auklet_0001_797538_1.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/11.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/11.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
             <tbody>
@@ -390,17 +362,13 @@
                     <th>Prosody</th>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\prosody\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\prosody\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/SC_WaveRNN/15.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_woman/ParallWaveGAN/15.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
                 <tbody>
                 <tr>
                     <th>Speaker</th>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\speaker\Black_Footed_Albatross_0001_796111_0.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\speaker\Rhinoceros_Auklet_0001_797538_0.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/SC_WaveRNN/10.wav" type="audio/wav"></audio></td>
-                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wav_for_demo/singing/Test_seen_man/PWG/10.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\ViewGeneration\birds\speaker\Groove_Billed_Ani_0002_1670_0.wav" type="audio/wav"></audio></td>
                 </tr>
             </tbody>
         </table>
@@ -414,7 +382,7 @@
 
 
             <thead>
-            <th style="text-align: center">Speech manipulation</th>
+            <th width="20%"; style="text-align: center">Multi-view</th>
             <th style="text-align: center"><span class="text_e2e">That will not signify; I never mind dirt."</span><br><br><br></th>
             <th style="text-align: center"><span class="text_e2e">To the understanding or to the senses?</span><br><br><br></th>
             <th style="text-align: center"><span class="text_e2e">Thus spake Zarathustra.</span><br><br><br></th>
@@ -444,7 +412,7 @@
             </tbody>
             <tbody>
                 <tr>
-                    <th>Content</th>
+                    <th>Text</th>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\14_208_000007_000000.wav" type="audio/wav"></audio></td>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\296_129659_000004_000002.wav" type="audio/wav"></audio></td>
                     <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs\SpeakerVerification\content\1392_128226_000013_000003.wav" type="audio/wav"></audio></td>
@@ -464,6 +432,76 @@
 
         <h2> 3. Ablation Study</h2>
 
+        <table>
+         <thead>
+            <th style="text-align: center; width: 250px;" >Text</th>
+            <th style="text-align: center ; width: 250px;"><span class="text_e2e">and having, quote, somewhat bushy, end quote, hair.</span></th>
+            <th style="text-align: center ; width: 250px;"><span class="text_e2e">since a disclosure of such detailed information relating to protective measures might undermine present methods of protecting the President.</span></th>
+
+            <tbody>
+                <tr>
+                    <th> GT </th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/GT/LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/GT/LJ046-0026.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr>
+                    <th> w/o LVC</th>
+               
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/withoutLVC/LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/withoutLVC/LJ046-0026.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+
+            <tbody>
+               <tr>
+                   <th> w/o NP</th>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/withoutNP/LJ037-0061.wav" type="audio/wav"></audio></td>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/withoutNP/LJ046-0026.wav" type="audio/wav"></audio></td>
+               </tr>
+           </tbody>
+
+            <tbody>
+                <tr>
+                    <th> Continuous level 6 steps </th>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/continous/BDDM-6step_DDPM-rev_LJ037-0061.wav" type="audio/wav"></audio></td>
+                    <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/continous/BDDM-6step_DDPM-rev_LJ046-0026.wav" type="audio/wav"></audio></td>
+                </tr>
+            </tbody>
+
+            
+            <tbody>
+               <tr>
+                   <th> Continuous level 1000 steps </th>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/continous/BDDM-1000step_DDPM-rev_LJ037-0061.wav" type="audio/wav"></audio></td>
+                   <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/continous/BDDM-1000step_DDPM-rev_LJ046-0026.wav" type="audio/wav"></audio></td>
+               </tr>
+           </tbody>
+
+
+
+           
+           <tbody>
+            <tr>
+                <th> Discrete index 6 steps </th>
+                <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/discrete/BDDM-6step_DDPM-rev_LJ037-0061.wav" type="audio/wav"></audio></td>
+                <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/discrete/BDDM-6step_DDPM-rev_LJ046-0026.wav" type="audio/wav"></audio></td>
+            </tr>
+        </tbody>
+
+        <tbody>
+         <tr>
+             <th> Discrete index 1000 steps </th>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/discrete/BDDM-1000step_DDPM-rev_LJ037-0061.wav" type="audio/wav"></audio></td>
+             <td style="text-align: center"><audio controls style="width: 150px;"><source src="wavs/Ablation/discrete/BDDM-1000step_DDPM-rev_LJ046-0026.wav" type="audio/wav"></audio></td>
+         </tr>
+     </tbody>
+
+
+        </table>
+
+        
       </div>
 </body>
 
